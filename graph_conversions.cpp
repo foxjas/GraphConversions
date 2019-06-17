@@ -82,12 +82,15 @@ void readMarket(char* inputGraphPath, unordered_set<vertexId_t> &vertices, vecto
         } else if (direction == UNDIRECTED) {
             edges.push_back(edge_t(min(src, dst), max(src, dst)));
         }
+        if (src == dst)
+            selfEdges += 1;
         vertices.insert(src);
         vertices.insert(dst);
     }
 
     fclose (fp);
     printf("Original input: %d vertices, %d edges\n", vertices.size(), edges.size());
+    printf("Self-edges during reading: %d edges\n", selfEdges);
 
     if (direction == UNDIRECTED) {
         // process to remove potential duplicates and/or self-loops
@@ -131,6 +134,7 @@ void readSNAP(char* inputGraphPath, unordered_set<vertexId_t> &vertices, vector<
 
     // read in edges
     vertexId_t src, dst;
+    int selfEdges = 0;
     while(fgets(temp, MAX_CHARS, fp) != NULL) {
         sscanf(temp, "%d %d\n", (vertexId_t*)&src, (vertexId_t*)&dst);
         if (direction == DIRECTED) {
@@ -141,12 +145,16 @@ void readSNAP(char* inputGraphPath, unordered_set<vertexId_t> &vertices, vector<
         } else if (direction == UNDIRECTED) {
             edges.push_back(edge_t(min(src, dst), max(src, dst)));
         }
+        if (src == dst)
+            selfEdges += 1;
         vertices.insert(src);
         vertices.insert(dst);
+
     }
 
     fclose (fp);
     printf("Original input: %d vertices, %d edges\n", vertices.size(), edges.size());
+    printf("Self-edges during reading: %d edges\n", selfEdges);
 
     if (direction == UNDIRECTED) {
         // process to remove potential duplicates and/or self-loops
@@ -376,6 +384,9 @@ int main(const int argc, char *argv[])
     string outFileName(output_graph_path);
     bool isMarketInput = inFileName.find(".mtx")==std::string::npos?false:true;
     bool isSnapInput = inFileName.find(".txt")==std::string::npos?false:true;
+    if (!isSnapInput && !isMarketInput) {
+        printf("Unrecognized input file extension. Defaulting to COO format\n");
+    }
     bool isMarketOutput = outFileName.find(".mtx")==std::string::npos?false:true;
     bool isSnapOutput = outFileName.find(".txt")==std::string::npos?false:true;
 
